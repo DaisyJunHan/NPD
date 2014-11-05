@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">NPD GAMES</string>
+    <string name="balance_app_name">Balance Ball</string>
+    <string name="action_settings">Settings</string>
+    <string name="pipe_game">Pipe Game</string>
+    <string name="login">Login</string>
+    <string name="patient_id">Patient ID</string>
+    <string name="choices">Select Number of Choices</string>
+    <string name="correct">correct</string>
+    <string name="guess_country">Where is this card?</string>
+    <string name="guesses">guesses</string>
+    <string name="incorrect_answer">Incorrect!</string>
+    <string name="more_regions_title">More Regions Required</string>
+    <string name="more_regions_message">There are not enough countries in 
+      the selected regions. Please select more regions.</string>
+    <string name="of">of</string>
+    <string name="ok">OK</string>
+    <string name="question">Question</string>
+    <string name="quiz_title">Card Memorize Quiz</string>
+    <string name="regions">Select Regions</string>
+    <string name="reset_quiz">Reset Quiz</string>
+    <string name="game_over">Game Over</string>
+    <string name="next_level">Next Level</string>
+    <string name="score">totalScore: %1$d</string>
+    <string name="results_format">      Total Score: %1$d\n</string>
+    <string name="win">You win!</string>
+    <string name="lose">You lose!</string>
+     <string name="reset_game">Reset Game</string>
+<string name="life_format">Life Remained: %1$d\n</string>
+    <string name="life_reduced">Life Reduced!</string>
+    <string name="retry">Retry</string>
+    <string-array name="regionsList">
+        <item>Poker</item>
+    </string-array>
+    <string-array name="guessesList">
+        <item>3</item>
+        <item>6</item>
+        <item>9</item>
+    </string-array>
+    
+        <string name="balloon_level1">LEVEL 1</string>
+    <string name="balloon_level2">LEVEL 2</string>
+    <string name="balloon_level3">LEVEL 3</string>
+    <string name="balloon_level4">LEVEL 4</string>
+    <string name="balloon_level5">LEVEL 5</string>
+    <string name="balloon_level6">LEVEL 6</string>
+    
+
+</resources>

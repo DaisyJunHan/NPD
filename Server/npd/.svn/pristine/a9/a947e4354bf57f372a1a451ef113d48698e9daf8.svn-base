@@ -1,0 +1,170 @@
+/**
+ * Copyright     2014     Renren.com
+ * @author JunHan 
+ *  All rights reserved.
+ */
+package com.unimelb.npd.server.dao.impl;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import net.sf.json.JSONArray;
+
+import com.unimelb.npd.server.dao.IGameDao;
+import com.unimelb.npd.server.dbutil.DBConn;
+import com.unimelb.npd.server.vo.Game;
+
+
+public class GameDaoImpl implements IGameDao {
+	private DBConn dbconn = null;
+
+	public GameDaoImpl() {
+		this.dbconn = new DBConn();
+	}
+	/* (non-Javadoc)
+	 * @see com.unimelb.npd.server.dao.IGameDao#addGame(com.unimelb.npd.server.po.Game)
+	 */
+	@Override
+	public int addGame(Game game) {
+		// TODO Auto-generated method stub
+		int gid = game.getGid();
+		int time = game.getTime();
+		int score = game.getScore();
+		int level = game.getLevel();
+		int pid = game.getPid();
+		String strSQL = "insert into npd.game_record values(?,?,?,?,?,null)";
+		int result = this.dbconn.execOther(strSQL, new Object[]{gid,time,score,level,pid});
+		return result;
+	}
+	/* (non-Javadoc)
+	 * @see com.unimelb.npd.server.dao.IGameDao#findGameRecord(int, java.lang.String)
+	 */
+	@Override
+	public JSONArray findGameRecord(int gid, String pname) {
+		// TODO Auto-generated method stub
+		System.out.println(pname);
+		String sql = "select pid from npd.patient where patient_name = ?";
+		ResultSet rs1 = this.dbconn.execQuery(sql, new Object[]{pname});
+		int pid = 0;
+		if(rs1!=null){
+			try {
+				if(rs1.next()){
+				pid =	rs1.getInt(1);
+				System.out.println(pid);
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+		}else{
+			return null;
+		}
+		
+		String strSQL = "select * from npd.game_record where gid = ? and pid = ?";
+//		System.out.println(strSQL+"-------gid="+gid+"----pid="+pid);
+		ResultSet rs = this.dbconn.execQuery(strSQL, new Object[]{gid,pid});
+		
+		List<Game> lst = new ArrayList<Game>();
+		if(rs!=null){
+			try {
+				while(rs.next()){
+					Game game = new Game();
+					game.setGid(rs.getInt(1));
+					game.setTime(rs.getInt(2));
+					game.setScore(rs.getInt(3));
+					game.setLevel(rs.getInt(4));
+					game.setPid(rs.getInt(5));
+					game.setRid(rs.getInt(6));
+					lst.add(game);
+				}
+				System.out.println(lst.size());
+				JSONArray jsonArray = JSONArray.fromObject( lst );  
+				
+				System.out.println(jsonArray);
+				return jsonArray;
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+		}else{
+			return null;
+		}
+		
+		
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.unimelb.npd.server.dao.IGameDao#checkGameRecord(com.unimelb.npd.server.vo.Game)
+	 */
+	@Override
+	public int checkGameRecord(int gid, int pid,int level) {
+		String strSQL = "select * from npd.game_record where gid = ? and pid = ? and level=?";
+		ResultSet rs = this.dbconn.execQuery(strSQL, new Object[]{gid,pid,level});
+		int result = -1;
+		if(rs!=null){
+			try {
+				if(rs.next()){
+					result = rs.getInt(6);
+				}
+			}catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return result;
+	}
+	/* (non-Javadoc)
+	 * @see com.unimelb.npd.server.dao.IGameDao#updateGame(com.unimelb.npd.server.vo.Game, int)
+	 */
+	@Override
+	public int updateGame(Game game, int rid) {
+		int gid = game.getGid();
+		int time = game.getTime();
+		int score = game.getScore();
+		int level = game.getLevel();
+		int pid = game.getPid();
+		String strSQL = "update npd.game_record set gid =?,time=?,score=?,level=?,pid=? where rid=?";
+		int result = this.dbconn.execOther(strSQL, new Object[]{gid,time,score,level,pid,rid});
+		return result;
+	}
+	/* (non-Javadoc)
+	 * @see com.unimelb.npd.server.dao.IGameDao#findRecordByGid(int)
+	 */
+	@Override
+	public JSONArray findRecordByGid(int gid) {
+		String strSQL = "select * from npd.game_record where gid = ?";
+		ResultSet rs = this.dbconn.execQuery(strSQL, new Object[]{gid});
+		
+		List<Game> lst = new ArrayList<Game>();
+		if(rs!=null){
+			try {
+				while(rs.next()){
+					Game game = new Game();
+					game.setGid(rs.getInt(1));
+					game.setTime(rs.getInt(2));
+					game.setScore(rs.getInt(3));
+					game.setLevel(rs.getInt(4));
+					game.setPid(rs.getInt(5));
+					game.setRid(rs.getInt(6));
+					lst.add(game);
+				}
+				System.out.println(lst.size());
+				JSONArray jsonArray = JSONArray.fromObject( lst );  
+				
+				System.out.println(jsonArray);
+				return jsonArray;
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+		}else{
+			return null;
+		}
+	}
+
+}

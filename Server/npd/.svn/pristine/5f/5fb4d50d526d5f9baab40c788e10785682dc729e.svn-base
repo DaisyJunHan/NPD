@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>NPD GAMES - RESULT</title>
+<link rel="shortcut icon" href="http://www.unimelb.edu.au/favicon.ico" type="image/x-icon" />
+<link rel="stylesheet" href="../css/metro-bootstrap.min.css">
+<link rel="stylesheet" href="../css/metro-bootstrap-responsive.min.css">
+<link rel="stylesheet" href="../css/style.css">
+<script type="text/javascript" src="../js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../js/jsapi.js"></script>
+	<script type="text/javascript" >
+	google.load('visualization', '1.0', {'packages':['corechart']});
+	var length = 0;
+	$(document).ready(function(){
+		$.ajax({
+		      type: "get",
+		      async: false,
+		      url: "http://localhost:8080/npd/GetAllPatient",
+		      data: "",
+		      contentType: "text/plain; charset=utf-8",
+		      dataType: "json",
+			  //jsonp:"jsonpcallback",
+			  timeout:100000, 
+		      cache: false,
+		      success: function (data) {
+		    	if(data.length!=0)
+		    	{
+		    		for(var i=0;i<data.length;i++){
+		    			$("#sltName").append("<option value='"+data[i].patient_name+"'>"+data[i].patient_name+"</option>"); 
+		    	}
+		    		}
+		    	else
+		    	{alert("Please Sign in to access results.");
+		    	window.location.href="../index.html";
+		    	}
+		      	},
+		  		error: function(XMLHttpRequest, textStatus, errorThrown) {
+		        alert(errorThrown);
+		    	}
+			});
+		function main(pid){
+			var arr1 = new Array();
+			var arr2 = new Array();
+			var all1 = new Array();
+			var all2 = new Array();
+	  		var url = "http://localhost:8080/npd/GameServlet?gid=4&pid="+pid;
+	  		var url1 = "http://localhost:8080/npd/GameServlet?gid=4&pid=all";
+	  		//alert(pid);
+	  		$.ajax({
+	  	      type: "get",
+	  	      async: false,
+	  	      url: url,
+	  	      data: "",
+	  	      contentType: "text/plain; charset=utf-8",
+	  	      dataType: "json",
+	  		  jsonp:"jsonpcallback",
+	  		  timeout:100000, 
+	  	      cache: false,
+	  	      success: function (data) {
+	  	    	  json = data;
+	  	    
+	  	    	length = data.length;
+	  	      	for(var i=0;i<length;i++){
+	  	      		//arr[i] = data[i].score;
+	  	      		//alert(arr[i]);
+	  	      	switch(data[i].level){
+	  	      		case 1:
+	  	      			arr1.push(data[i].score);
+	  	      			break;
+	  	      		case 2:
+	  	      			arr2.push(data[i].score);
+	  	      			break;
+	  	      		/*
+
+	  	      		case 3:
+	  	      			arr3.push(data[i].score);
+	  	      			break;
+	  	      			  	      		case 4:
+	  	      			arr.push(data[i].time);
+	  	      			break;
+	  	      		case 5:
+	  	      			arr.push(data[i].time);
+	  	      			break;
+	  	      		case 6:
+	  	      			arr.push(data[i].time);
+	  	      			break;*/
+	  	      			}
+	  	      		}
+	  	      
+	  	      	
+	  	      	},
+	  	  		error: function(XMLHttpRequest, textStatus, errorThrown) {
+	  	        alert(errorThrown);
+	  	    	}
+	  		});
+	  		$.ajax({
+		  	      type: "get",
+		  	      async: false,
+		  	      url: url1,
+		  	      data: "",
+		  	      contentType: "text/plain; charset=utf-8",
+		  	      dataType: "json",
+		  		  jsonp:"jsonpcallback",
+		  		  timeout:100000, 
+		  	      cache: false,
+		  	      success: function (data) {
+		  	    	//alert(data);
+		  	    	length = data.length;
+		  	      	for(var i=0;i<length;i++){
+		  	      		//arr[i] = data[i].score;
+		  	      		//alert(arr[i]);
+		  	      	switch(data[i].level){
+		  	      		case 1:
+		  	      			all1.push(data[i].score);
+		  	      			break;
+		  	      		case 2:
+		  	      			all2.push(data[i].score);
+		  	      			break;
+		  	      		/*
+		  	      		case 3:
+		  	      			all3.push(data[i].score);
+		  	      			break;
+		  	      			
+		  	      		case 4:
+		  	      			arr.push(data[i].time);
+		  	      			break;
+		  	      		case 5:
+		  	      			arr.push(data[i].time);
+		  	      			break;
+		  	      		case 6:
+		  	      			arr.push(data[i].time);
+		  	      			break;*/
+		  	      			}
+		  	      		}
+		  	      
+		  	      	
+		  	      	},
+		  	  		error: function(XMLHttpRequest, textStatus, errorThrown) {
+		  	        alert(errorThrown);
+		  	    	}
+		  		});
+	  		var data = google.visualization.arrayToDataTable([
+	        	                                      	        ['Level ', 'Highest Score',pid],
+	        	                                      	        ['level 1', Math.max.apply(null, all1), Math.max.apply(null, arr1)],
+	        	                                      	        ['level 2',Math.max.apply(null, all2),Math.max.apply(null, arr2)],
+	        	                                      	      /* ['level 3', Math.max.apply(null, all3),Math.max.apply(null, arr3)],
+	        	                                      	        ['level 4', parseInt(arr[3])],
+	        	                                      	        ['level 5', parseInt(arr[4])],
+	        	                                      	        ['level 6', parseInt(arr[5])],*/
+	        	                                      	      ]);
+	        	                                      	      var options = {
+	        	                                      	    		    title: 'Breakout Game Result',
+	        	                                      	    		    hAxis: {format:'### points',title: 'The Best Score', titleTextStyle: {color: 'red'}}
+	        	                                      	    		  };
+	        	                                      	    var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+	        	                                      	     chart.draw(data, options);
+	  	  	
+		}
+	$('#sltName').change(function(){
+		var pid=$('#sltName').val();
+		main(pid);
+	});
+	$('#btn').click(main);
+	$("#sltName").keyup(function(){
+        if(event.keyCode == 13){
+        	main();
+        }
+    });
+	});
+  
+	google.setOnLoadCallback(function() {  
+      	//alert(1);
+      	var data = google.visualization.arrayToDataTable([
+      	                                                ['Level ', 'Best Score'],
+      	                                      	        ['level 1', 0],
+      	                                      	        ['level 2',0],
+      	                                      	       
+      	                                      	       
+      	                                      	      ]);
+      	                                      	      var options = {
+      	                                      	    		    title: 'Breakout Game Result',
+      	                                      	    		    hAxis: {format:'### points',title: 'The Best Score', titleTextStyle: {color: 'red'}}
+      	                                      	    		  };
+      	                                      	    var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+      	                                      	     chart.draw(data, options);
+    // }) ; 
+})  ;
+  
+	
+	
+	 
+
+  </script>
+</head>
+<body class="metro">
+	<nav class="breadcrumbs">
+		<ul>
+			<li><a href="../index.html">Home</a></li>
+			<li><a href="#">Breakout Game</a></li>
+		</ul>
+	</nav>
+	
+		<div id="search_div"  style="width: 25%; float: right;">
+		<div style="float:left;margin:1%;">Patient Id:</div>
+		<select id="sltName" style="float:left;margin:1%">
+		<option value="">Patient ID</option>
+		</select>
+			<!-- <input type="text" style="float:left;margin:1%" id="txtName" /> -->
+			<input type="button" style="float:left;margin:1%" id="btn"  value="search" />
+		</div>
+		
+		
+
+
+	<div id="mainDIV" class="">
+		<div id="chart_div" class="chart_bar" style="width: 95%; height: 200px; float: left">
+			<img src="../images/progress.gif" alt="Loading..." class="progressbar" height="100" width="100">
+		</div>
+		
+		
+	</div>
+</body>
+</html>

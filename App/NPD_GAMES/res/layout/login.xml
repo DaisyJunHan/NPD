@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/login_bg"
+    android:orientation="vertical" >
+
+ 	 <ImageButton
+ 	     android:id="@+id/btnRegister"
+ 	     android:layout_width="wrap_content"
+ 	     android:layout_height="wrap_content"
+ 	     android:layout_alignParentRight="true"
+ 	     android:layout_alignParentTop="true"
+ 	     android:background="@drawable/register"
+ 	     android:src="@drawable/register" />
+
+ 	 <EditText
+ 	     android:id="@+id/username_text"
+ 	     android:layout_width="wrap_content"
+ 	     android:layout_height="wrap_content"
+ 	     android:layout_centerHorizontal="true"
+ 	     android:layout_centerVertical="true"
+ 	     android:ems="10"
+ 	     android:hint="@string/patient_id"
+ 	     android:inputType="text"
+ 	     android:maxLength="40"
+ 	     android:singleLine="true"
+ 	     android:textColor="@android:color/black" />
+
+ 	 <ImageButton
+ 	     android:id="@+id/btnLogin"
+ 	     android:layout_width="wrap_content"
+ 	     android:layout_height="wrap_content"
+ 	     android:layout_alignParentBottom="true"
+ 	     android:layout_centerHorizontal="true"
+ 	     android:layout_marginBottom="16dp"
+ 	     android:background="@drawable/login_btn"
+ 	     android:contentDescription="Login" />
+
+</RelativeLayout>

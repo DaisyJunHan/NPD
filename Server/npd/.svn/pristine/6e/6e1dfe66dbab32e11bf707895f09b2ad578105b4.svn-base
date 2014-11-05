@@ -1,0 +1,75 @@
+/**
+ * Copyright     2014     Renren.com
+ * @author JunHan 
+ *  All rights reserved.
+ */
+package com.unimelb.npd.server.dao.impl;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+
+import com.unimelb.npd.server.dao.IGameDao;
+import com.unimelb.npd.server.dbutil.DBConn;
+import com.unimelb.npd.server.vo.Game;
+
+
+public class GameDaoImpl implements IGameDao {
+	private DBConn dbconn = null;
+
+	public GameDaoImpl() {
+		this.dbconn = new DBConn();
+	}
+	/* (non-Javadoc)
+	 * @see com.unimelb.npd.server.dao.IGameDao#addGame(com.unimelb.npd.server.po.Game)
+	 */
+	@Override
+	public int addGame(Game game) {
+		// TODO Auto-generated method stub
+		int gid = game.getGid();
+		int time = game.getTime();
+		int score = game.getScore();
+		int level = game.getLevel();
+		int pid = game.getPid();
+		String strSQL = "insert into game_record values(null,£¿,?,?,?,?)";
+		int result = this.dbconn.execOther(strSQL, new Object[]{gid,time,score,level,pid});
+		return result;
+	}
+	/* (non-Javadoc)
+	 * @see com.unimelb.npd.server.dao.IGameDao#findGameRecord(int, java.lang.String)
+	 */
+	@Override
+	public JSONArray findGameRecord(int gid, int pid) {
+		// TODO Auto-generated method stub
+		String strSQL = "select * from game_record where gid = ? and pid = ?";
+		ResultSet rs = this.dbconn.execQuery(strSQL, new Object[]{gid,pid});
+		List<Game> lst = new ArrayList<Game>();
+		try {
+			while(rs.next()){
+				Game game = new Game();
+				game.setGid(rs.getInt(1));
+				game.setTime(rs.getInt(2));
+				game.setScore(rs.getInt(3));
+				game.setLevel(rs.getInt(4));
+				game.setPid(rs.getInt(5));
+				game.setRid(rs.getInt(6));
+				lst.add(game);
+			}
+			System.out.println(lst.size());
+			JSONArray jsonArray = JSONArray.fromObject( lst );  
+			
+			System.out.println(jsonArray);
+			return jsonArray;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+
+}

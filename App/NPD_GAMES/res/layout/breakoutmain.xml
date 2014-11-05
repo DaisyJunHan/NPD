@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#000000"
+    android:orientation="horizontal" >
+    
+<com.unimelb.npd.games.breakout.CannonView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cannonView"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_weight="1"
+    
+    tools:context=".CannonGame" />
+
+<RelativeLayout
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_gravity="center"
+    android:layout_weight="2"
+    android:background="@drawable/detail"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingTop="70dp" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/linearLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="20dp" >
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Player:"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/textView8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Player1" 
+                android:textColor="@android:color/black" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="20dp" >
+
+            <TextView
+                android:id="@+id/bk1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Score:"
+                android:textAppearance="?android:attr/textAppearanceSmall" 
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/currtscoreView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="currentScore" 
+                android:textColor="@android:color/black" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="20dp" >
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Next:"
+                android:textAppearance="?android:attr/textAppearanceSmall" 
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/sveniD"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView" 
+                android:textColor="@android:color/black" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="20dp" >
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Highest Score:"
+                android:textAppearance="?android:attr/textAppearanceSmall" 
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/lastScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView" 
+                android:textColor="@android:color/black" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="20dp" >
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Level:"
+                android:textAppearance="?android:attr/textAppearanceSmall" 
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/currtLevel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="currtLevel" 
+                android:textColor="@android:color/black" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="20dp" >
+
+            <TextView
+                android:id="@+id/textView7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Live: "
+                 android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/life"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" 
+                android:textColor="@android:color/black" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="20dp" >
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rank:"
+                android:textAppearance="?android:attr/textAppearanceSmall" 
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/textRank"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                 android:textColor="@android:color/black" />
+        </LinearLayout>
+    </LinearLayout>
+   
+</RelativeLayout>
+
+</LinearLayout>

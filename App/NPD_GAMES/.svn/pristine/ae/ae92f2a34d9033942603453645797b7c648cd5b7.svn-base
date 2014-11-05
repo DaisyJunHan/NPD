@@ -1,0 +1,190 @@
+package com.unimelb.npd.games.chosecolor;
+
+import java.io.Serializable;
+
+import com.unimelb.npd.games.SendResultThread;
+import com.unimelb.npd.server.vo.Game;
+import com.unimelb.npd.server.vo.Patient;
+
+import android.support.v7.app.ActionBarActivity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.MailTo;
+import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.TextView;
+
+public class ChoseColor extends ActionBarActivity {
+	//Patient patient;
+	public Patient patient;
+	public int pid;
+	public String patient_name;
+	public int age;
+	public int color_level;
+	//public static final int MAX_LEVEL = 5; 
+	int LEVEL;
+	public int SCREENWIDTH;
+	public int SCREENHEIGHT;
+	ChoseColorView ccv;
+	TextView textview;
+	boolean gameOver = false;
+	boolean flagSendResult;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		flagSendResult=true;
+		patient = new Patient();
+		Intent intent = this.getIntent();
+		Bundle bundle = intent.getExtras();
+
+		if (bundle != null && bundle.containsKey("patient")) {
+			patient = (Patient) bundle.getSerializable("patient");
+			pid = patient.getPid();
+			patient_name = patient.getPatient_name();
+			age = patient.getAge();
+			color_level = patient.getColor_level();
+//			if(color_level< MAX_LEVEL){
+//			this.LEVEL = color_level + 1;
+//			}else{
+//				this.LEVEL=1;
+//			}
+		}
+		
+		//LEVEL = user.getBalloon_level();
+		//LEVEL = intent.getIntExtra("LEVEL", LEVEL);
+		ccv = new ChoseColorView(ChoseColor.this);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		
+		//setContentView(R.layout.chosecolor);
+		
+		DisplayMetrics dm = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(dm);
+		SCREENWIDTH = dm.widthPixels;
+		SCREENHEIGHT = dm.heightPixels;
+		//setContentView(R.layout.chosecolor);
+		//textview = (TextView)findViewById(R.id.countdowntimer);
+		setContentView(ccv);
+
+	}
+	
+/*	public void reStart() {
+		Intent backToBalloonView = new Intent();
+		backToBalloonView.setClass(ChoseColor.this, ChoseColor.class);
+		Bundle bundle = new Bundle();
+		bundle.putSerializable("patient", (Serializable) patient);
+		backToBalloonView.putExtras(bundle);
+		startActivity(backToBalloonView);
+		finish();
+	}*/
+	
+	public boolean onTouchEvent(MotionEvent event) {
+		boolean isTouched = this.ccv.onTouchEvent(event);
+		return isTouched;
+	}
+	
+	public void gameOver() {
+		ccv.odt.runFlag = 2;
+		AlertDialog isExit = new AlertDialog.Builder(this).create();
+		if(ccv.score <= 100) {//highscore
+			if(ccv.time<0)
+				isExit.setTitle("Time Up! Your Score is "+ccv.score);
+			else
+				isExit.setTitle("Wrong Mesh! Your Score is "+ccv.score);
+		} else {
+			isExit.setTitle("Congratulations! "+ccv.score+ "is your new highest score!");
+		}
+			isExit.setMessage("Would you like to try again?");
+			isExit.setButton("Try Again", listener_gameover);
+			isExit.setButton2("Quit", listener_gameover);
+			isExit.show();
+		if(flagSendResult){
+			long current =System.currentTimeMillis();
+			long temp = 1410000000000L;
+			int currT = (int) (current - temp);
+			Game game = new Game();
+			game.setGid(6);
+			game.setLevel(1);
+			game.setPid(this.pid);
+			game.setTime(currT);
+			game.setScore(ccv.score);
+			game.setAccuracy(0);
+			game.setPercent(0);
+			SendResultThread sendResultThread = new SendResultThread(game);
+			sendResultThread.start();
+		//if(ccv.score <= patient.chosecolor_score) {
+			flagSendResult = false;
+		}
+	}
+	DialogInterface.OnClickListener listener_gameover = new DialogInterface.OnClickListener() {
+		@Override
+		public void onClick(DialogInterface dialog, int which)
+		{
+			switch (which) {
+			case AlertDialog.BUTTON_POSITIVE:
+				flagSendResult=true;
+				recreate();
+				break;
+			case AlertDialog.BUTTON_NEGATIVE:
+				finish();
+				break;
+			default:
+				break;
+			}
+		}
+	};
+	
+	@Override
+	public boolean onKeyDown(int KeyCode, KeyEvent event){
+		if(KeyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0)
+		{
+			ccv.odt.runFlag = 1;
+			AlertDialog isExit = new AlertDialog.Builder(this).create();
+			isExit.setTitle("Give Up!");
+			isExit.setMessage("Are you sure to quit?");
+			isExit.setButton("Quit", listener_quit);
+			isExit.setButton2("No", listener_quit);
+			isExit.show();
+			
+			//finish();
+			
+		}
+		return true;
+	}
+	DialogInterface.OnClickListener listener_quit = new DialogInterface.OnClickListener() {
+		@Override
+		public void onClick(DialogInterface dialog, int which)
+		{
+			switch (which) {
+			case AlertDialog.BUTTON_POSITIVE:
+				/*Intent backToMene = new Intent();
+
+				backToMene.setClass(ChoseColor.this, MainMenu.class);
+				Bundle bundle = new Bundle();
+				bundle.putSerializable("patient", (Serializable) patient);
+				bundle.putInt("LEVEL", LEVEL);
+				backToMene.putExtras(bundle);
+				startActivity(backToMene);*/
+				finish();
+				break;
+			case AlertDialog.BUTTON_NEGATIVE:
+				ccv.odt.runFlag = 0;
+				break;
+			default:
+				break;
+			}
+		}
+	};
+
+	
+}

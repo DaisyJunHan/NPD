@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>NPD GAMES - RESULT</title>
+<link rel="shortcut icon" href="http://www.unimelb.edu.au/favicon.ico" type="image/x-icon" />
+<link rel="stylesheet" href="../css/metro-bootstrap.min.css">
+<link rel="stylesheet" href="../css/metro-bootstrap-responsive.min.css">
+<link rel="stylesheet" href="../css/style.css">
+<script type="text/javascript" src="../js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+	
+  	google.load('visualization', '1.0', {'packages':['corechart']});
+	
+	var url = "http://localhost:8080/npd/GameServlet?pid=1&gid=1";
+	var arr = new Array();
+	var length = 0;
+	$.ajax({
+      type: "get",
+      async: false,
+      url: url,
+      data: "",
+      contentType: "text/plain; charset=utf-8",
+      dataType: "json",
+	  jsonp:"jsonpcallback",
+	  timeout:100000, 
+      cache: false,
+      success: function (data) {
+    	length = data.length;
+      	for(var i=0;i<length;i++){
+      		switch(data[i].level){
+      		case 1:
+      			arr.push(data[i].time);
+      			break;
+      		case 2:
+      			arr.push(data[i].time);
+      			break;
+      		case 3:
+      			arr.push(data[i].time);
+      			break;
+      		/*case 4:
+      			arr.push(data[i].time);
+      			break;
+      		case 5:
+      			arr.push(data[i].time);
+      			break;
+      		case 6:
+      			arr.push(data[i].time);
+      			break;*/
+      		}
+      	}
+      	},
+  		error: function(XMLHttpRequest, textStatus, errorThrown) {
+        alert(errorThrown);
+    	}
+  	});
+	google.load("visualization", "1", {packages:["corechart"]});
+    google.setOnLoadCallback(drawChart);
+    function drawChart() {
+      var data = google.visualization.arrayToDataTable([
+        ['time ', 'time'],
+        ['level 1', parseInt(arr[0])],
+        ['level 2',parseInt(arr[1])],
+        ['level 3', parseInt(arr[2])],
+        /*['level 4', parseInt(arr[3])],
+        ['level 5', parseInt(arr[4])],
+        ['level 6', parseInt(arr[5])],*/
+      ]);
+      var options = {
+    		    title: 'PipeGame Result',
+    		    hAxis: {format:'###s',title: 'Time Consumption', titleTextStyle: {color: 'red'}}
+    		  };
+
+    		  var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+
+    		  chart.draw(data, options);
+
+    		}
+  </script>
+</head>
+<body class="metro">
+	<nav class="breadcrumbs">
+		<ul>
+			<li><a href="./index.html">Home</a></li>
+			<li><a href="#">Pipe Game</a></li>
+		</ul>
+	</nav>
+	<div id="mainDIV" class="">
+		<div id="chart_div" class="chart_bar" style="width: 95%; height: 250px; float: left">
+			<img src="../images/progress.gif" alt="Loading..." class="progressbar" height="100" width="100">
+		</div>
+		
+		
+	</div>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>NPD GAMES - RESULT</title>
+<link rel="shortcut icon" href="http://www.unimelb.edu.au/favicon.ico" type="image/x-icon" />
+<link rel="stylesheet" href="../css/metro-bootstrap.min.css">
+<link rel="stylesheet" href="../css/metro-bootstrap-responsive.min.css">
+<link rel="stylesheet" href="../css/style.css">
+<script type="text/javascript" src="../js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="../js/jsapi.js"></script>
+	<script type="text/javascript" >
+	google.load('visualization', '1.0', {'packages':['corechart']});
+	
+	var length = 0;
+	$(document).ready(function(){
+		$.ajax({
+		      type: "get",
+		      async: false,
+		      url: "http://localhost:8080/npd/GetAllPatient",
+		      data: "",
+		      contentType: "text/plain; charset=utf-8",
+		      dataType: "json",
+			  //jsonp:"jsonpcallback",
+			  timeout:100000, 
+		      cache: false,
+		      success: function (data) {
+		    	if(data.length!=0)
+		    	{
+		    		for(var i=0;i<data.length;i++){
+		    			$("#sltName").append("<option value='"+data[i].patient_name+"'>"+data[i].patient_name+"</option>"); 
+		    	}
+		    		}
+		    	else
+		    	{alert("Please Sign in to access results.");
+		    	window.location.href="../index.html";
+		    	}
+		      	},
+		  		error: function(XMLHttpRequest, textStatus, errorThrown) {
+		        alert(errorThrown);
+		    	}
+			});
+		function main(pid){
+			var arr1 = new Array();
+			var arr2 = new Array();
+			var arr3 = new Array();
+			var date1 = new Array();
+			var date2 = new Array();
+			var date3 = new Array();
+			//	var pid=$('#txtName').val();
+		  		var url = "http://localhost:8080/npd/GameServlet?gid=1&pid="+pid;
+		  		//alert(pid);
+		  		$.ajax({
+		  	      type: "get",
+		  	      async: false,
+		  	      url: url,
+		  	      data: "",
+		  	      contentType: "text/plain; charset=utf-8",
+		  	      dataType: "json",
+		  		  jsonp:"jsonpcallback",
+		  		  timeout:100000, 
+		  	      cache: false,
+		  	      success: function (data) {
+		  	    	//alert(data);
+		  	    	length = data.length;
+		  	      	for(var i=0;i<length;i++){
+		  	      		//arr[i] = data[i].score;
+		  	      		//alert(arr[i]);
+		  	      	switch(data[i].level){
+		  	      		case 1:
+		  	      			arr1.push(data[i].percent);
+		  	      			date1.push(data[i].date);
+		  	      			break;
+		  	      		case 2:
+		  	      			arr2.push(data[i].percent);
+		  	      		date2.push(data[i].date);
+		  	      			break;
+		  	      		case 3:
+		  	      			arr3.push(data[i].percent);
+		  	      		date3.push(data[i].date);
+		  	      			break;
+		  	      			/*
+		  	      		case 4:
+		  	      			arr.push(data[i].time);
+		  	      			break;
+		  	      		case 5:
+		  	      			arr.push(data[i].time);
+		  	      			break;
+		  	      		case 6:
+		  	      			arr.push(data[i].time);
+		  	      			break;*/
+		  	      			}
+		  	      		}
+		  	      //	var arr_length = [arr1.length,arr2.length,arr3.length];
+		  	      var dt1 = new google.visualization.DataTable();
+		  	    var formatter = new google.visualization.DateFormat({pattern: "dd/MM/yy-H:m:s"});
+		  	    arr1.sort(function(a,b){return a.time-b.time});
+		  	       dt1.addColumn('date','Date');
+		  	       dt1.addColumn('number','Level 1');
+		  	      
+		  	       dt1.addRows(arr1.length);
+		  	     for(var i=0;i<arr1.length;i++){
+			  	    	var array = date1[i].split(",");
+			  	    	
+			  	    	var nums = [ ];
+			  	    	for (var j=0 ; j< array.length ; j++)
+			  	    	{
+			  	    	    nums.push(parseInt(array[j]));
+			  	    	}
+			  	    	 var d = new Date(nums[0],nums[1]-1,nums[2],nums[3],nums[4],nums[5]);
+			  	    	 dt1.setCell(i,0,d);
+			  	    	dt1.setCell(i,1,arr1[i]/1000);
+			  	       }
+			  	     
+			  	     formatter.format(dt1, 0);
+		  	       var options = {
+		  	         title: 'Percentage of Mutiple Times - Level 1',
+		  	         curveType: 'none',
+		  	         legend: { position: 'bottom' },
+		  	         vAxis: {format:'###%',gridlines:{count:5}},
+		  	       };
+
+		  	       var chart = new google.visualization.LineChart(document.getElementById('chart_div1'));
+		  	       chart.draw(dt1, options);
+		  	    
+		  	      	
+		  	     var dt2 = new google.visualization.DataTable();
+			  	    arr2.sort(function(a,b){return a.time-b.time});
+			  	       dt2.addColumn('date','Date');
+			  	       dt2.addColumn('number','Level 2');
+			  	      
+			  	       dt2.addRows(arr2.length);
+			  	     for(var i=0;i<arr2.length;i++){
+			  	    	 var array2 = date2[i].split(",");
+				  	    	var nums2 = [ ];
+				  	    	for (var j=0 ; j< array2.length ; j++)
+				  	    	{
+				  	    	    nums2.push(parseInt(array2[j]));
+				  	    	}
+				  	    	 var d = new Date(nums2[0],nums2[1]-1,nums2[2],nums2[3],nums2[4],nums2[5]);
+			  	    	 dt2.setCell(i,0,d);
+			  	    	dt2.setCell(i,1,arr2[i]/1000);
+			  	       }
+			  	     formatter.format(dt2, 0);
+			  	       var options = {
+			  	         title: 'Percentage of Mutiple Times - Level 2',
+			  	         curveType: 'none',
+			  	         legend: { position: 'bottom' },
+			  	         vAxis: {format:'##.#%',gridlines:{count:5}},
+			  	       };
+
+			  	       var chart = new google.visualization.LineChart(document.getElementById('chart_div2'));
+			  	       chart.draw(dt2, options);
+			  	       
+			  	     var dt3 = new google.visualization.DataTable();
+				  	    arr3.sort(function(a,b){return a.time-b.time});
+				  	       dt3.addColumn('date','Date');
+				  	       dt3.addColumn('number','Level3');
+				  	      
+				  	       dt3.addRows(arr3.length);
+				  	     for(var i=0;i<arr3.length;i++){
+				  	    	 var array3 = date3[i].split(",");
+					  	    	var nums3 = [ ];
+					  	    	for (var j=0 ; j< array3.length ; j++)
+					  	    	{
+					  	    	    nums3.push(parseInt(array3[j]));
+					  	    	}
+					  	    	 var d = new Date(nums3[0],nums3[1]-1,nums3[2],nums3[3],nums3[4],nums3[5]);
+				  	    	dt3.setCell(i,0,d);
+				  	    	dt3.setCell(i,1,arr3[i]/1000);
+				  	       }
+				  	     formatter.format(dt3, 0);
+				  	       var options = {
+				  	         title: 'Percentage of Mutiple Times - Level 3',
+				  	         curveType: 'none',
+				  	         legend: { position: 'bottom' },
+				  	         vAxis: {format:'##.#%',gridlines:{count:5}},
+				  	       };
+
+				  	       var chart = new google.visualization.LineChart(document.getElementById('chart_div3'));
+				  	       chart.draw(dt3, options);
+		  	      	},
+		  	  		error: function(XMLHttpRequest, textStatus, errorThrown) {
+		  	        alert(errorThrown);
+		  	    	}
+		  		});
+		  	  	
+		}
+		$('#sltName').change(function(){
+			var pid=$('#sltName').val();
+			main(pid);
+		});
+		$('#btn').click(main);
+		$("#sltName").keyup(function(){
+	        if(event.keyCode == 13){
+	        	main();
+	        }
+	    });
+		});
+  
+	google.setOnLoadCallback(function() {  
+		 var dt = new google.visualization.DataTable();
+	       dt.addColumn('number','Times');
+	       dt.addColumn('number','Level');
+	      
+	       dt.addRows(1);
+	       
+	    	//dt.setCell(0,0,0);
+	    	//dt.setCell(1,1,1);
+	       
+	       
+	       var options = {
+	         title: 'Percentage of Mutiple Times',
+	         curveType: 'none',
+	         legend: { position: 'bottom' },
+	         vAxis: {format:'###',gridlines:{count:5}}
+	       };
+
+	       var chart1 = new google.visualization.LineChart(document.getElementById('chart_div1'));
+	       var chart2 = new google.visualization.LineChart(document.getElementById('chart_div2'));
+	       var chart3 = new google.visualization.LineChart(document.getElementById('chart_div3'));
+	       chart1.draw(dt, options);
+	       chart2.draw(dt, options);
+	       chart3.draw(dt, options);
+})  ;
+  
+	
+	
+	 
+
+  </script>
+</head>
+<body class="metro">
+	<nav class="breadcrumbs">
+		<ul>
+			<li><a href="../index.html">Home</a></li>
+			<li><a href="#">Pipe Game</a></li>
+		</ul>
+	</nav>
+	
+		<div id="search_div"  style="width: 25%; float: right;">
+		<div style="float:left;margin:1%;">Patient Id:</div>
+				<select id="sltName" style="float:left;margin:1%">
+		<option value="">Patient ID</option>
+		</select>
+			<!-- <input type="text" style="float:left;margin:1%" id="txtName" /> -->
+			<input type="button" style="float:left;margin:1%" id="btn"  value="search" />
+		</div>
+		
+		
+
+
+	<div id="mainDIV" class="">
+	<a href="#" onclick="javascipt:showImg();">Show the paths and percentage in the game</a>
+		<script type="text/javascript" >
+		function showImg(){
+			
+			document.getElementById('img_div1').style.display='block';
+			document.getElementById('img_div2').style.display='block';
+			document.getElementById('img_div3').style.display='block';
+		}
+		</script>
+		<div id="chart_div1" class="chart_bar" style="width: 65%; height: 400px; float: left">
+			<img src="../images/progress.gif" alt="Loading..." class="progressbar" height="100" width="100"/>
+		</div>
+		<div id="img_div1" style="width: 35%; height: 400px; float: left;display:none" >
+			<img src="../images/l1.png" alt="show" height="320" width="320"/>
+		</div>
+		<div id="chart_div2" class="chart_bar" style="width: 65%; height: 400px; float: left">
+			<img src="../images/progress.gif" alt="Loading..." class="progressbar" height="100" width="100"/>
+		</div>
+		<div id="img_div2" style="width: 35%; height: 400px; float: left;display:none" >
+			<img src="../images/l2.png" alt="show" height="320" width="320">
+		</div>
+		<div id="chart_div3" class="chart_bar" style="width: 65%; height: 400px; float: left">
+			<img src="../images/progress.gif" alt="Loading..." class="progressbar" height="100" width="100">
+		</div>
+		<div id="img_div3" style="width: 35%; height: 400px; float: left;display:none" >
+			<img src="../images/l3.png" alt="show" height="320" width="320">
+		</div>
+	</div>
+</body>
+</html>

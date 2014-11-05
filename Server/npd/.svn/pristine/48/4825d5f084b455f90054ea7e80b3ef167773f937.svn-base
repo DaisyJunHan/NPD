@@ -1,0 +1,47 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>NPD Games</title>
+<link rel="shortcut icon" href="http://www.unimelb.edu.au/favicon.ico"
+	type="image/x-icon" />
+<link rel="shortcut icon" href="http://www.unimelb.edu.au/favicon.ico" type="image/x-icon" />
+<link rel="stylesheet" href="../css/metro-bootstrap.min.css">
+<link rel="stylesheet" href="../css/metro-bootstrap-responsive.min.css">
+<link rel="stylesheet" href="../css/style.css">
+
+<script type="text/javascript" src="../js/jquery.isotope.js"></script>
+<script type="text/javascript" src="../js/metro.min.js"></script>
+</head>
+<body class="metro">
+	<nav class="breadcrumbs">
+		<ul>
+			<li><a href="../index.html">Home</a></li>
+			<li><a href="#">Register Page</a></li>
+		</ul>
+	</nav>
+<form action ="../RegisterServlet" method="post">
+<center>
+<p>
+<table border="0" class="form">
+<tr height="40px">
+<td>Patient Name : </td>
+<td><input type="text" id="username" name ="username"/></td>
+</tr>
+<tr height="40px">
+<td>Patient age : </td>
+<td><input type="text" id="age" name ="age"/></td>
+</tr>
+<tr>
+<td colSpan = "2" align="center" height="100px">
+<input type="submit" id="submit"/> 
+<input type="reset" id = "reset"/>
+</td>
+</tr>
+</table>
+</center>
+</form>
+</body>
+</html>

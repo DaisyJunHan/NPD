@@ -1,0 +1,55 @@
+/**
+ * Copyright     2014     Renren.com
+ * @author JunHan 
+ *  All rights reserved.
+ */
+package com.unimelb.npd.server.vo;
+
+
+public class Game {
+
+	private int rid;
+	private int gid;
+	private int time;
+	private int score;
+	private int level;
+	private int pid;
+	
+	public int getRid() {
+		return rid;
+	}
+	public void setRid(int rid) {
+		this.rid = rid;
+	}
+	public int getGid() {
+		return gid;
+	}
+	public void setGid(int gid) {
+		this.gid = gid;
+	}
+	public int getTime() {
+		return time;
+	}
+	public void setTime(int time) {
+		this.time = time;
+	}
+	public int getScore() {
+		return score;
+	}
+	public void setScore(int score) {
+		this.score = score;
+	}
+	public int getLevel() {
+		return level;
+	}
+	public void setLevel(int level) {
+		this.level = level;
+	}
+	public int getPid() {
+		return pid;
+	}
+	public void setPid(int pid) {
+		this.pid = pid;
+	}
+	
+}

@@ -1,0 +1,244 @@
+package com.unimelb.npd.games.pipe;
+
+
+
+import java.util.HashMap;
+
+import com.unimelb.npd.games.GameOverView;
+import com.unimelb.npd.games.MenuView;
+import com.unimelb.npd.games.R;
+import com.unimelb.npd.games.WelcomeView;
+
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Rect;
+import android.media.AudioManager;
+import android.media.SoundPool;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.DisplayMetrics;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.Window;
+import android.view.WindowManager;
+import static com.unimelb.npd.games.pipe.ViewConstant.*;
+
+enum WhichView{WELCOME_VIEW,GAME_VIEW,GAMEOVER_VIEW,MENU_VIEW};
+public class PipeGameActivity extends Activity {
+	
+	
+	public static final int STATUS_PLAY = 0;		//游戏进行中
+	public static final int STATUS_PAUSE = 1;		//游戏暂停
+	public static final int STATUS_WIN = 2;			//通过一关
+	public static final int STATUS_LOSE = 3;		//丢掉一条命
+	public static final int STATUS_OVER = 4;		//送完命了，游戏结束
+	public static final int STATUS_PASS = 5;		//通全关
+//	public static final int MAX_LIFE = 5;			//最大生命数
+	public static final int MAX_LEVEL = 3;			//最大关卡数	
+	int level = 1;	
+	WhichView wv;
+	WelcomeView welcomeView;
+	PipeGameView gameView;
+	GameOverView gameoverView;
+	MenuView menuView;
+	SoundPool soundPool;
+	HashMap<Integer, Integer> soundPoolMap;
+	int screenWidth;
+	int screenHeight;
+	Rect rectGameMsgBox;
+	public Handler myHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case 0:
+				wv = WhichView.GAMEOVER_VIEW;
+				gotoGameOverView();
+				break;
+			case 1:
+				wv = WhichView.MENU_VIEW;
+				gotoMenuView();
+				break;
+			 case 2:
+				 wv = WhichView.GAME_VIEW;
+				 gotoGameView();
+				 break;
+			// break;
+			// case 3:
+			// gotoJifenView();
+			// break;
+			// case 4:
+			// gotoMusicView();
+			// break;
+			default:
+				if(msg.what>10){
+					gameView.resumeGame();
+					gameView.initMap(msg.what-10);
+//					gotoGameView(msg.what-10);
+				}
+				break;
+			}
+		}
+	
+		
+
+		
+		
+	};
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		 requestWindowFeature(Window.FEATURE_NO_TITLE); 
+	        getWindow().setFlags(
+	        		WindowManager.LayoutParams.FLAG_FULLSCREEN ,  
+	                WindowManager.LayoutParams.FLAG_FULLSCREEN
+	        );
+	      //设置横屏模式
+//			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//	        hd.sendEmptyMessage(0);
+	        setVolumeControlStream(AudioManager.STREAM_MUSIC);//游戏过程中只允许多媒体音量,而不允许通化音量
+	        initPm();//调整屏幕分辨率
+	        initRect();
+	        initSound();
+//	        gotoWelcomeView();
+//	        myHandler.sendEmptyMessage(0);
+	        gotoGameView();
+//	        gotoMenuView();
+	}
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		if(event.getAction() == MotionEvent.ACTION_UP){		
+			int x=(int)event.getX();
+			int y=(int)event.getY();
+			if(wv == WhichView.GAME_VIEW){
+				if(gameView.status == STATUS_WIN){
+					if(rectGameMsgBox.contains(x, y)){
+						gameView.initMap(level);
+						gameView.resumeGame();
+					}
+				}
+			}
+			}
+		return true;
+	}
+	public void gotoGameView() {
+		gameView=new PipeGameView(PipeGameActivity.this);    		
+    	setContentView(gameView);
+    	wv=WhichView.GAME_VIEW;
+		
+	}
+	private void gotoMenuView() {
+		if(menuView==null)
+    	{
+			menuView=new MenuView(this);
+    	}
+    	setContentView(menuView);
+    	wv=WhichView.MENU_VIEW;
+	}
+	public void gotoGameOverView() {
+		if(gameoverView==null)
+    	{
+			gameoverView=new GameOverView(this);
+    	}
+    	setContentView(gameoverView);
+    	wv=WhichView.GAMEOVER_VIEW;
+	}
+//	public void gotoWelcomeView()
+//	    {
+//	    	if(welcomeView==null)
+//	    	{
+//	    		welcomeView=new WelcomeView(this);
+//	    	}
+//	    	setContentView(welcomeView);
+//	    	wv=WhichView.WELCOME_VIEW;
+//	    }
+	 public void initRect(){
+	    	rectGameMsgBox = new Rect(140,351,367,487);
+	    }
+	 @SuppressLint("UseSparseArrays")
+	public void initSound()
+	    {
+			//声音池
+			soundPool = new SoundPool(4, AudioManager.STREAM_MUSIC, 100);
+		    soundPoolMap = new HashMap<Integer, Integer>();   
+		    //吃东西音乐
+		    soundPoolMap.put(1, soundPool.load(this, R.raw.bi, 1)); 
+		    soundPoolMap.put(2, soundPool.load(this, R.raw.next, 1)); 
+
+	    }
+	 public void playSound(int sound, int loop) 
+	    {
+	    	if(!isnoPlaySound)
+	    	{
+	    		return;
+	    	}
+		    AudioManager mgr = (AudioManager)this.getSystemService(Context.AUDIO_SERVICE);   
+		    float streamVolumeCurrent = mgr.getStreamVolume(AudioManager.STREAM_MUSIC);   
+		    float streamVolumeMax = mgr.getStreamMaxVolume(AudioManager.STREAM_MUSIC);       
+		    float volume = streamVolumeCurrent / streamVolumeMax;   
+		    soundPool.play(soundPoolMap.get(sound), volume, volume, 1, loop, 1f);
+		}
+	 public void initPm()
+	    {
+	    	//获取屏幕分辨率
+	        DisplayMetrics dm=new DisplayMetrics();
+	        getWindowManager().getDefaultDisplay().getMetrics(dm);
+	        screenHeight=(int) (height=dm.heightPixels);
+	        screenWidth=(int) (width=dm.widthPixels); 
+//	        
+	        if(screenHeight>screenWidth)
+	        {
+	        	height=screenHeight;
+	        	width=screenWidth;
+	        }
+	        else
+	        {
+	        	height=screenWidth;
+	        	width=screenHeight;
+	        }
+	        float zoomx=width/480;
+			float zoomy=height/800;
+			if(zoomx>zoomy){
+				xZoom=yZoom=zoomy;
+				
+			}else
+			{
+				xZoom=yZoom=zoomx;
+			}
+			sXtart=(width-480*xZoom)/2;
+			sYtart=(height-800*yZoom)/2;
+			initChessViewFinal();
+	    }
+	
+	
+	 @Override
+		public boolean onKeyDown(int keyCode, KeyEvent e)
+	    {
+	    	if(keyCode!=4)
+	    	{
+	    		return true;  
+	    	}
+	    	if(wv==WhichView.WELCOME_VIEW)
+	    	{
+	    		return true;
+	    	}
+	    	
+	    	if(wv==WhichView.GAME_VIEW)
+	    	{
+	    		gameView.threadFlag=false;
+	    		System.exit(0);
+	    		return true;
+	    	}
+	    	System.exit(0);
+	    	return true;
+	    }
+	public void sendMessage(int what) {
+		Message msg1 = myHandler.obtainMessage(what);
+		myHandler.sendMessage(msg1);
+	}
+
+}

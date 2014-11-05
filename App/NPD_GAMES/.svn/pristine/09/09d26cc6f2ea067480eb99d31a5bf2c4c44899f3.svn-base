@@ -1,0 +1,531 @@
+package com.unimelb.npd.games.pipe;
+
+import static com.unimelb.npd.games.pipe.ViewConstant.*;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import com.unimelb.npd.games.R;
+import com.unimelb.npd.games.SendResultThread;
+import com.unimelb.npd.server.vo.Game;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Typeface;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+
+public class PipeGameView extends SurfaceView implements SurfaceHolder.Callback {
+	PipeGameActivity father;
+	SurfaceHolder holder;// 画布
+	int screenW;
+	int screenH;
+	int status;
+	boolean threadFlag = true;// 线程是否运行
+	// private Canvas canvas = null;
+	public static int zTime;
+	public static int endTime;
+	public static float xZoom = 1F;// 缩放比例
+	public static float yZoom = 1F;
+	public static float xSpan = 48.0f * xZoom;
+	public static float ySpan = 48.0f * yZoom;
+	public static float scoreWidth = 8 * xZoom * 4f;// 时间数字间隔
+	public static float topSpan = 2 * xZoom * 4f;
+
+
+	private Bitmap[] bitmapBg = new Bitmap[PipeGameActivity.MAX_LEVEL];
+	private Bitmap background;
+	// private Bitmap bitmapTop;
+	// private Bitmap bitmapScore;
+	private Bitmap bitmapTime;
+	private Bitmap bitmapFinger;
+	private Bitmap bitmapColon;
+	private Bitmap bitmapNL;
+	private Bitmap bitmapWin;
+	// private Finger finger;
+	private Bitmap[] iscore = new Bitmap[10];// 数字图
+	private Paint paint;// 画笔
+	private Paint p;
+
+	private int[][] arrMap;
+	private int unitWidth, unitHeight;
+	private float fingerX;
+	private float fingerY;
+	private float fingerSize;
+	private Rect rect;
+	DrawThread drawThread;
+	SendResultThread sendResultThread;
+	public int time;
+	boolean flagSendResult;
+	private int percentArray[] = {125,111,71};
+	private int percent;
+	private boolean touchFlag= true;
+	
+	public PipeGameView(Context context) {
+		super(context);
+		this.father = (PipeGameActivity) context;
+		holder = getHolder();
+		this.getHolder().addCallback(this);
+		
+		drawThread = new DrawThread(holder, this);
+		paint = new Paint();
+		p = new Paint();
+		paint.setAntiAlias(true);
+		p.setAntiAlias(true);
+		xZoom = ViewConstant.xZoom;
+			
+		initBitmap();
+		initMap(this.father.level);
+	}
+
+	public void initMap(int level) {
+		this.time = 0;
+		flagSendResult = true;
+		background = bitmapBg[level-1];
+		arrMap = GameMap.getMap(level);
+		percent = percentArray[level-1];
+		// init Finger location
+		fingerSize = this.bitmapFinger.getWidth();
+		boolean flag = false;
+		for (int i = 0; i < arrMap.length; i++) {
+			if (flag) {
+				break;
+			}
+			for (int j = 0; j < arrMap[i].length; j++) {
+				if(arrMap[i][j]>0){
+				int m = arrMap[i][j];
+				//Log.d("m", m+"");
+				int n = -1;
+				String str = new String();
+				str=m+"";
+				str = str.substring(1);
+				//Log.d("start", str);
+				n = Integer.parseInt(str);
+				if (n==99) {
+					fingerX = unitWidth * j + fingerSize / 2;
+					fingerY = unitHeight * i + fingerSize / 2;
+					rect = new Rect((int) (fingerX), (int) (fingerY),
+							(int) (fingerX + fingerSize), (int) (fingerY + fingerSize));
+					flag = true;
+					break;
+
+				}}
+			}
+		}
+		
+		unitWidth = this.father.screenWidth / GameMap.getCols(level);
+		unitHeight = this.father.screenHeight / GameMap.getRows(level);
+	}
+
+	public void doDraw(Canvas canvas, int time) {
+		// canvas = this.holder.lockCanvas();
+		// canvas.drawColor(Color.argb(255, 0, 0, 0));
+		zTime = time;
+		RectF rect = new RectF(0, 0, this.father.screenWidth,
+				this.father.screenHeight);
+		canvas.drawBitmap(background, null, rect, null);
+		paint.setColor(Color.rgb(50, 80, 120));
+		paint.setTextSize(12);
+//		for(int i=0;i<9;i++){
+//			canvas.drawLine(0, i*unitHeight, screenW, i*unitHeight, paint);
+//			for(int j=0;j<6;j++){
+//				canvas.drawLine(j*unitWidth, 0, j*unitWidth, screenH, paint);
+//			}
+//		}
+		switch(status){
+		case PipeGameActivity.STATUS_WIN:
+			time = endTime;
+//			Rect gmBox = new Rect(140,351,367,487);
+			canvas.drawBitmap(bitmapNL,screenW/2-bitmapNL.getWidth()/2,screenH/2-bitmapNL.getHeight()/2,null);
+			canvas.drawText("Level "+this.father.level+" - "+time/10+" seconds", 200, 400, paint);
+//			Log.d("log", (screenW/2-bitmapNL.getWidth()/2 )+","+ (screenH/2+bitmapNL.getHeight()/2)+","+(screenH/2-bitmapNL.getHeight()/2)+","+(screenH/2+bitmapNL.getHeight()/2));
+			break;
+		case PipeGameActivity.STATUS_PASS:
+			time = endTime;
+			canvas.drawBitmap(bitmapWin,screenW/2-bitmapNL.getWidth()/2,screenH/2-bitmapNL.getHeight()/2,null);
+			canvas.drawText("Level "+this.father.level+" - "+time/10+" seconds", 200, 400, paint);
+			break;
+		}
+		
+		// canvas.drawBitmap(bitmapScore, this.father.screenWidth / 2,
+		// topSpan / 6, null);
+		
+//		drawString(canvas, mm + "", sXtart + 6f * xSpan, sYtart + 0.2f * ySpan);
+//		canvas.drawBitmap(bitmapColon, sXtart + scoreWidth * 2 + 6.3f * xSpan,
+//				sYtart + 0.2f * ySpan, null);
+//		drawString(canvas, ss + "", scoreWidth * 3 + sXtart + 6f * xSpan,
+//				sYtart + 0.2f * ySpan);
+		p.setTextSize(screenW/11);
+		p.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD)); 
+		p.setColor(Color.rgb(157, 87, 75));
+		int ss = time / 10 > 60 ? (time / 10) % 60 : time / 10;
+		int mm = time / 10 / 60 > 1 ? time / 10 / 60 : 0;
+		String m =mm+"";
+		String s =ss+"";
+		m = m.length()<2?"0"+m:m;
+		s = s.length()<2?"0"+s:s;
+		canvas.drawText("Time: "+ m +":"+s, screenW/12, screenH/20*2, p);
+		canvas.drawText("Patient ID: " + this.father.patient_name, screenW/12, screenH/20, p);
+		canvas.drawBitmap(bitmapFinger, fingerX, fingerY, null);
+		// holder.unlockCanvasAndPost(canvas);
+		
+	}
+
+	public void drawString(Canvas canvas, String s, float width, float height)// 绘制字符串方法
+	{
+
+		if (s.length() < 2) {
+			s = "0" + s;
+		}
+		for (int i = 0; i < s.length(); i++) {// 循环绘制得分
+			int tempScore = s.charAt(i) - '0';
+			canvas.drawBitmap(iscore[tempScore], width + i * scoreWidth,
+					height, null);
+		}
+	}
+
+	public void initBitmap() {
+		
+		bitmapBg[0] = ViewConstant.scaleToFit(BitmapFactory.decodeResource(
+				getResources(), R.drawable.pipegame1), xZoom);
+		bitmapBg[1] = ViewConstant.scaleToFit(BitmapFactory.decodeResource(
+				getResources(), R.drawable.pipegame2), xZoom);// 背景图
+		bitmapBg[2] = ViewConstant.scaleToFit(BitmapFactory.decodeResource(
+				getResources(), R.drawable.pipegame3), xZoom);// 背景图
+		// bitmapTop = ViewConstant.scaleToFit(
+		// BitmapFactory.decodeResource(getResources(), R.drawable.top),
+		// xZoom);// 背景图
+		// bitmapScore = ViewConstant.scaleToFit(
+		// BitmapFactory.decodeResource(getResources(), R.drawable.score),
+		// xZoom);// 背景图
+		bitmapNL = ViewConstant.scaleToFit(
+				BitmapFactory.decodeResource(getResources(), R.drawable.nextlevel),
+				xZoom);
+		bitmapWin = ViewConstant.scaleToFit(
+				BitmapFactory.decodeResource(getResources(), R.drawable.win),
+				xZoom);
+		bitmapTime = ViewConstant.scaleToFit(
+				BitmapFactory.decodeResource(getResources(), R.drawable.time),
+				xZoom);// 背景图
+		bitmapFinger = ViewConstant.scaleToFit(BitmapFactory.decodeResource(
+				getResources(), R.drawable.pipefinger1), xZoom);// 背景图
+		iscore[0] = scaleToFit(
+				BitmapFactory.decodeResource(getResources(), R.drawable.d0),
+				xZoom);// 数字图
+		iscore[1] = scaleToFit(
+				BitmapFactory.decodeResource(getResources(), R.drawable.d1),
+				xZoom);
+		iscore[2] = scaleToFit(
+				BitmapFactory.decodeResource(getResources(), R.drawable.d2),
+				xZoom);
+		iscore[3] = scaleToFit(
+				BitmapFactory.decodeResource(getResources(), R.drawable.d3),
+				xZoom);
+		iscore[4] = scaleToFit(
+				BitmapFactory.decodeResource(getResources(), R.drawable.d4),
+				xZoom);
+		iscore[5] = scaleToFit(
+				BitmapFactory.decodeResource(getResources(), R.drawable.d5),
+				xZoom);
+		iscore[6] = scaleToFit(
+				BitmapFactory.decodeResource(getResources(), R.drawable.d6),
+				xZoom);
+		iscore[7] = scaleToFit(
+				BitmapFactory.decodeResource(getResources(), R.drawable.d7),
+				xZoom);
+		iscore[8] = scaleToFit(
+				BitmapFactory.decodeResource(getResources(), R.drawable.d8),
+				xZoom);
+		iscore[9] = scaleToFit(
+				BitmapFactory.decodeResource(getResources(), R.drawable.d9),
+				xZoom);
+		bitmapColon = scaleToFit(
+				BitmapFactory.decodeResource(getResources(), R.drawable.colon),
+				xZoom);
+	}
+
+	private Point point = new Point();// 点击点
+	private boolean isFinger = false;// 判断是否点击在图片上，否则拖动无效
+	private int offsetX = 0, offsetY = 0;// 点击点离图片左上角的距离
+
+	@SuppressLint("ClickableViewAccessibility")
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		
+		point.x = (int) event.getX();
+		point.y = (int) event.getY();
+		switch (event.getAction()) {
+		case MotionEvent.ACTION_DOWN:
+			if (rect.contains(point.x, point.y)) {
+				isFinger = true;
+				offsetX = point.x - rect.left;
+				offsetY = point.y - rect.top;
+			}
+//			Rect gmBox = new Rect(140,351,367,487);
+			Rect gmBox = new Rect(screenW/2-bitmapNL.getWidth()/2,screenH/2-bitmapNL.getHeight()/2,screenW/2+bitmapNL.getWidth()/2,screenH/2+bitmapNL.getHeight()/2);
+			switch(status){
+			
+			case PipeGameActivity.STATUS_WIN:
+				
+				if(gmBox.contains(point.x,point.y)){
+					this.father.level = this.father.level+1;
+					status = PipeGameActivity.STATUS_PLAY;
+					initMap(this.father.level);
+				}
+				break;
+			case PipeGameActivity.STATUS_PASS:
+				
+				if(gmBox.contains(point.x,point.y)){
+					
+					this.father.sendMessage(1);
+					this.father.level=1;
+				}
+				break;
+			}
+			break;
+			
+		case MotionEvent.ACTION_MOVE:
+			if (isFinger) {
+				rect.left = (int) event.getX() - offsetX;
+				rect.top = (int) event.getY() - offsetY;
+				rect.right = (int) (rect.left + fingerSize);
+				rect.bottom = (int) (rect.top + fingerSize);
+				if(rect.right >= screenW||rect.left<=0||rect.top<=screenH/3||rect.bottom>=screenH){
+					touchFlag = false;
+					return touchFlag;
+				}else{
+				fingerX = rect.left;
+				fingerY = rect.top;
+				checkEdge(rect);
+				return touchFlag;
+				}
+				// Canvas canvas = holder.lockCanvas(rect);
+				// canvas.drawBitmap(bitmapFinger, rect.left,rect.top,null);
+				// holder.unlockCanvasAndPost(canvas);
+				// canvas.drawBitmap(bitmapFinger, rect.left,rect.top,null);
+			}
+			break;
+		case MotionEvent.ACTION_UP:
+			isFinger = false;
+			rect.left = (int) fingerX;
+			rect.right = (int) (fingerX + fingerSize);
+			rect.top = (int) fingerY;
+			rect.bottom = (int) (fingerY + fingerSize);
+			break;
+
+		default:
+			break;
+		}
+		return true;
+	}
+
+	public void checkEdge(Rect finger) {
+		int locTop = finger.top / unitHeight;
+		int locBottom = finger.bottom / unitHeight;
+		int locLeft = finger.left / unitWidth;
+		int locRight = finger.right / unitWidth;
+		
+		int tl = arrMap[locTop][locLeft];
+		int bl = arrMap[locBottom][locLeft];
+		int tr = arrMap[locTop][locRight];
+		
+		String strTL = tl>0?tl+"":"000";
+		String strTL1 = strTL.substring(0,1);
+		String strTL2 = strTL.substring(1);
+		
+		String strBL = bl>0?bl+"":"000";
+		String strBL1 = strBL.substring(0,1);
+		String strBL2 = strBL.substring(1);
+		
+		String strTR = tr>0?tr+"":"000";
+		String strTR1 = strTR.substring(0,1);
+		String strTR2 = strTR.substring(1);
+		//Log.d("start", str);
+		int tl1 = Integer.parseInt(strTL1);
+		int tl2 = Integer.parseInt(strTL2);
+		int bl1 = Integer.parseInt(strBL1);
+		int bl2 = Integer.parseInt(strBL2);
+		int tr1 = Integer.parseInt(strTR1);
+		int tr2 = Integer.parseInt(strTR2);
+		
+//		arrMap[locTop][locLeft] = arrMap[locTop][locLeft] > 100 ? arrMap[locTop][locLeft] - 100
+//				: arrMap[locTop][locLeft];
+		if (locTop == locBottom && locLeft == locRight) {
+			if (tl1 == 0) {
+				this.father.playSound(1, 1);
+				pauseGame();
+				endTime = zTime;
+				int score = ((300 - (endTime/10))*4*percent/1000)<300?((300 - (endTime/10))*4*percent/1000):295;
+				 saveResult(4*percent,score,this.father.level);
+				 flagSendResult = true;
+				 this.father.sendMessage(0);
+			}
+			if (tl1 == 9&&(status!=PipeGameActivity.STATUS_WIN||status!=PipeGameActivity.STATUS_PASS)) {
+				touchFlag = false;
+				this.father.playSound(2, 1);
+				endTime = zTime;
+				int score = ((300 - (endTime/10))*1)<300?((300 - (endTime/10))*1):295;
+				if(this.father.level < PipeGameActivity.MAX_LEVEL){
+				status = PipeGameActivity.STATUS_WIN;
+				saveResult(1000,score,this.father.level);
+//				drawThread.isGameOn = false;
+				}else{
+				status = PipeGameActivity.STATUS_PASS;
+				saveResult(1000,score,PipeGameActivity.MAX_LEVEL);
+				}
+				
+				
+//				drawThread.isGameOn = false;
+//				pauseGame();
+//				this.father.sendMessage(level + 10);
+
+			}
+		} else if (locTop != locBottom && locLeft == locRight) {
+			if (tl1 != 3&& bl1 != 1) {// bottom
+				this.father.playSound(1, 1);//Log.d("percent", (100-n2-1)*percent+"");
+				pauseGame();
+				endTime = zTime;
+				int score = ((300 - (endTime/10))*(100-bl2-1)*percent/1000)<300?((300 - (endTime/10))*(100-bl2-1)*percent/1000):300;
+				saveResult((100-bl2-1)*percent,score,this.father.level);
+				 flagSendResult = true;
+				 this.father.sendMessage(0);
+			}
+//		} else if (locTop > locBottom && locLeft == locRight) {
+//			if (arrMap[locBottom][locLeft] != 1) {// bottom
+//				this.father.playSound(1, 1);
+//				 this.father.sendMessage(0);
+//			}
+		} else if (locTop == locBottom && locLeft != locRight) {
+			if (tl1 != 2&&tr1 != 4) {// bottom
+				this.father.playSound(1, 1);//Log.d("percent", (100-n2-1)*percent+"");
+				pauseGame();
+				endTime = zTime;
+				int score = ((300 - (endTime/10))*(100-tr2-1)*percent/1000)<300?((300 - (endTime/10))*(100-bl2-1)*percent/1000):300;
+				saveResult((100-tr2-1)*percent,score,this.father.level);
+				 flagSendResult = true;
+				 this.father.sendMessage(0);
+			}
+		} else if (locTop == locBottom && locLeft > locRight) {
+			if (tr1 != 4) {// bottom
+				this.father.playSound(1, 1);
+				pauseGame();
+				endTime = zTime;
+				int score = ((300 - (endTime/10))*(100-tr2-1)*percent/1000)<300?((300 - (endTime/10))*(100-bl2-1)*percent/1000):300;
+				saveResult((100-tr2-1)*percent,score,this.father.level);
+				 flagSendResult = true;
+				 this.father.sendMessage(0);
+			}
+		}
+	}
+	public void saveResult(int p,int score,int level){
+		if(flagSendResult){
+//			long current =System.currentTimeMillis();
+//			long temp = 1410000000000L;
+//			int currT = (int) (current - temp);
+//			
+			Game game = new Game();
+			game.setGid(1);
+			game.setLevel(level);
+			game.setPid(this.father.pid);
+			game.setTime(endTime);
+			game.setScore(score);
+			game.setPercent(p);
+			game.setAccuracy(0);
+			sendResultThread = new SendResultThread(game);
+			sendResultThread.start();
+			flagSendResult = false;
+			}
+	}
+	@Override
+	public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void surfaceCreated(SurfaceHolder holder) {
+
+		screenW = getWidth();
+		screenH = getHeight();
+		initMap(this.father.level);
+		drawThread.isGameOn = true;
+		if(!drawThread.isAlive())
+		drawThread.start();
+		status = PipeGameActivity.STATUS_PLAY;
+	}
+
+	@Override
+	public void surfaceDestroyed(SurfaceHolder arg0) {
+		// TODO Auto-generated method stub
+	}
+
+	public void resumeGame() {
+		drawThread.isGameOn = true; //
+		status = PipeGameActivity.STATUS_PLAY;
+	}
+
+	public void pauseGame() {
+		drawThread.isGameOn = false;
+		status = PipeGameActivity.STATUS_PAUSE;
+	}
+	public void shutAll(){
+		drawThread.isGameOn = false;		//暂停GameThread
+		drawThread.flag = false;			//停止GameThread
+	}
+
+//	public void repaint() {
+//		SurfaceHolder holder = this.getHolder();
+//		Canvas canvas = holder.lockCanvas();// 获取画布
+//		try {
+//			synchronized (holder) {
+//				onDraw(canvas);// 绘制
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			if (canvas != null) {
+//				holder.unlockCanvasAndPost(canvas);
+//			}
+//		}
+//	}
+	// @Override
+	// public void run() {
+	// while (DRAW_THREAD_FLAG) {
+	// time++;
+	// // doDraw(time);
+	// try {
+	// Thread.sleep(100);
+	// } catch (InterruptedException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// } }
+	// TODO Auto-generated method stub
+	// int SLEEP_TIME=100;
+	// while (DRAW_THREAD_FLAG) {
+	// long start=System.currentTimeMillis();
+	// Canvas canvas = holder.lockCanvas();
+	// canvas.drawBitmap(bitmapFinger, rect.left,rect.top,null);
+	// holder.unlockCanvasAndPost(canvas);
+	// long end=System.currentTimeMillis();
+	// if(end-start<SLEEP_TIME){
+	// try {
+	// Thread.sleep(SLEEP_TIME-(end-start));
+	// } catch (InterruptedException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// }
+	// }
+	// }
+	// }
+}

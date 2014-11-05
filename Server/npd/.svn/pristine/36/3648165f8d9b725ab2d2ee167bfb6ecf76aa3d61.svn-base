@@ -1,0 +1,46 @@
+;(function($,w){
+    w.NPD = w.NPD || {};
+    w.NPD = (function(){
+
+    	//init google charts
+    	function initGC(){
+    		google.load('visualization', '1.0', {'packages':['corechart']});
+    	}
+
+    	//load data
+    	function load(url, callback, param){
+    		if(arguments.lengh < 3){
+    			alert("parameters format error!");
+    			return;
+    		}
+			$.ajax({
+			    type: "get",
+			    async: true,
+			    url: url,
+			    data: "",
+			    contentType: "text/plain; charset=utf-8",
+			    dataType: "json",
+				jsonp:"jsonpcallback",
+				timeout:100000, 
+			    cache: false,
+			    beforeSend: function() {
+			    	$("#"+param.container+" img.progressbar").show();
+			    },
+			    success: function (data) {
+			 		callback(data, param);
+					$("#"+param.container+" img.progressbar").hide();
+				},
+				error: function(XMLHttpRequest, textStatus, errorThrown) {
+					alert(errorThrown);
+				}
+			});
+    	}
+
+    	//public object
+    	return {
+    		initGC : initGC,
+    		load : load
+    	}
+
+    }());	
+}(jQuery,window));

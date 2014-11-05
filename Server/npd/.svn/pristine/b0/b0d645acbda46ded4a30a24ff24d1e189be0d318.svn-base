@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NPD Games</title>
+<link rel="shortcut icon" href="http://www.unimelb.edu.au/favicon.ico"
+	type="image/x-icon" />
+<link rel="stylesheet" href="css/metro-bootstrap.min.css">
+<link rel="stylesheet" href="css/metro-bootstrap-responsive.min.css">
+<link rel="stylesheet" href="css/style.css">
+<script type="text/javascript"
+	src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript" src="js/jquery.isotope.js"></script>
+<script type="text/javascript" src="js/metro.min.js"></script>
+</head>
+<body class="metro">
+	<h1>NPD Games - Result Analysis</h1>
+	<div class="wrapper">
+		<div class="portfolioFilter">
+			<a href="#" data-filter="*" class="button large fg-white bg-dark">All
+				Games</a> 
+			<a href="#"
+				data-filter=".bg-darkBrown"
+				class="button large fg-white bg-darkBrown">Pipe</a> 
+			<a href="#"
+				data-filter="bg-cyan" class="button large fg-white bg-cyan">Ball</a>
+			<a href="#" data-filter=".bg-darkBlue"
+				class="button large fg-white bg-darkBlue"> Balloon </a> 
+			<a href="#"
+				data-filter=".bg-orange" class="button large fg-white bg-orange">Breakout</a>
+			<a href="#"
+				data-filter=".bg-green" class="button large fg-white bg-green">Poker</a> 
+			<a href="#" data-filter=".bg-teal"
+				class="button large fg-white bg-teal">Color</a>
+		</div>
+		<div class="portfolioContainer">
+			<div class="tile fg-white bg-darkBrown" fly="./html/game1-score.html">G1.Best Score</div>
+			<div class="tile fg-white bg-darkBrown" fly="./html/game1-time.html">G1. Timeline</div>
+			<div class="tile fg-white bg-cyan" fly="./html/game2-time.html">G2.Timeline</div>
+			<div class="tile fg-white bg-darkBlue" fly="./html/game3-time.html">G3.Timeline</div>
+			<div class="tile fg-white bg-orange" fly="./html/game4-time.html">G4.Timeline</div>
+			<div class="tile fg-white bg-green" fly="./html/game5-time.html">G5.Timeline</div>
+			<div class="tile fg-white bg-teal" fly="./html/game6-time.html">G6.Timeline</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		eval(function(p, a, c, k, e, d) {
+			e = function(c) {
+				return c.toString(36)
+			};
+			if (!''.replace(/^/, String)) {
+				while (c--) {
+					d[c.toString(a)] = k[c] || c.toString(a)
+				}
+				k = [ function(e) {
+					return d[e]
+				} ];
+				e = function() {
+					return '\\w+'
+				};
+				c = 1
+			}
+			;
+			while (c--) {
+				if (k[c]) {
+					p = p.replace(new RegExp('\\b' + e(c) + '\\b', 'g'), k[c])
+				}
+			}
+			return p
+		}
+				(
+						'$(8).l(2(){c $0=$(\'.o\');$0.i({5:\'*\',j:{g:d,e:\'h\',f:4}});$0.n("b","m[9]",2(){8.s($(3).6("9"),\'q\')});$(\'.7 a\').b(2(){$(\'.7 .1\').u(\'1\');$(3).t(\'1\');c k=$(3).6(\'r-5\');$0.i({5:k,j:{g:d,e:\'h\',f:4}});p 4})});',
+						31,
+						31,
+						'container|selected|function|this|false|filter|attr|portfolioFilter|window|fly||click|var|750|easing|queue|duration|linear|isotope|animationOptions|selector|load|div|on|portfolioContainer|return|_blank|data|open|addClass|removeClass'
+								.split('|'), 0, {}))
+	</script>
+</body>
+</html>

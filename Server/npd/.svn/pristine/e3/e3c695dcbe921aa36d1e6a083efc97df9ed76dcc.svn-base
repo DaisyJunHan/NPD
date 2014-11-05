@@ -1,0 +1,74 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+<title>点击登录按钮弹出登录层(HTML+CSS+JS)_懒人建站 http://www.51xuediannao.com</title>
+<meta name="keywords" content="HTML+CSS模板,HTML+CSS教程,HTML+CSS导航菜单,FLASH焦点图,网页特效" />
+<meta name="description" content="懒人建站为您提供-HTML+CSS模板，HTML+CSS教程，JS广告代码，HTML+CSS导航菜单，FLASH焦点图片，国外网页设计欣赏与模板和CSS技巧。" />
+<link href="./css/front.css" media="screen, projection" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div id="container">
+  <div id="topnav" class="topnav">点击右边的按钮试试? <a href="login" class="signin"><span>登录</span></a> </div>
+  <fieldset id="signin_menu">
+    <form method="post" id="signin" action="https://twitter.com/sessions">
+      <label for="username">Username or email</label>
+      <input id="username" name="username" value="" title="username" tabindex="4" type="text">
+      </p>
+      <p>
+        <label for="password">Password</label>
+        <input id="password" name="password" value="" title="password" tabindex="5" type="password">
+      </p>
+      <p class="remember">
+        <input id="signin_submit" value="Sign in" tabindex="6" type="submit">
+        <input id="remember" name="remember_me" value="1" tabindex="7" type="checkbox">
+        <label for="remember">Remember me</label>
+      </p>
+    </form>
+  </fieldset>
+</div>
+<script src="./js/jquery-1.11.1.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+        $(document).ready(function() {
+
+            $(".signin").click(function(e) {          
+				e.preventDefault();
+                $("fieldset#signin_menu").toggle();
+				$(".signin").toggleClass("menu-open");
+            });
+			
+			$("fieldset#signin_menu").mouseup(function() {
+				return false
+			});
+			$(document).mouseup(function(e) {
+				if($(e.target).parent("a.signin").length==0) {
+					$(".signin").removeClass("menu-open");
+					$("fieldset#signin_menu").hide();
+				}
+			});			
+			
+        });
+</script>
+<script src="./js/jquery.tipsy.js" type="text/javascript"></script>
+<script type='text/javascript'>
+    $(function() {
+	  $('#forgot_username_link').tipsy({gravity: 'w'});   
+    });
+  </script>
+
+
+
+
+
+
+
+<!--下面只是说明与程序代码无关-->
+<div style="width:95%; height:auto; display:block; margin:0 auto; margin-top:30px; font-size:10pt; line-height:150%;">
+<span>本代码由<a href="http://www.51xuediannao.com" style="color:#F00;">懒人建站网 收集整理</a> </span><br>
+<a href="http://www.51xuediannao.com">懒人建站 http://www.51xuediannao.com</a><br /><br/>
+<span>我们为您提供-HTML+CSS模板，HTML+CSS教程，JS广告代码，HTML+CSS导航菜单，FLASH焦点图片，国外网页设计欣赏与模板和CSS技巧。；</span><br />
+<span>懒人建站只收录实用和能提高用户体验的代码</span><br />
+<span>我们只想解放出你的部分写代码时间来思考更高层次的设计，而不是要你懒惰、拼凑。</span>
+</div>
+</body>
+</html>

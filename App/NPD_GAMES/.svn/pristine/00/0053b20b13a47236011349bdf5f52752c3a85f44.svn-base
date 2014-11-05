@@ -1,0 +1,288 @@
+package com.unimelb.npd.games.balloon;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import javax.microedition.khronos.opengles.GL10;
+
+import com.unimelb.npd.games.R;
+import com.unimelb.npd.games.SendResultThread;
+import com.unimelb.npd.server.vo.Game;
+
+
+
+import android.R.color;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Paint.Align;
+import android.graphics.RectF;
+
+import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+
+public class GameSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
+	BalloonGame balloongame;
+	private Paint paint;
+	private OnDrawThread odt;
+	private PicRunThread prt;
+	private CreateBallThread cbt;
+	private boolean flagSendResult;
+	int picAlphaNum = 255;
+	List<BallView> ballList = new ArrayList<BallView>();
+	BallGroupView ballgroupview = new BallGroupView(this);
+	// BallView ballview = new BallView();
+	int levelPic;
+	int score = 0;
+	String trapColor_str;
+	int trapColor_int;
+	GL10 gl;
+	SendResultThread sendResultThread;
+	boolean nextlevel = false;
+	boolean gameover = false;
+	//boolean pass = false;
+
+	public GameSurfaceView(Context context) {
+		super(context);
+		// TODO Auto-generated constructor stub
+		this.balloongame = (BalloonGame) context;
+		this.getHolder().addCallback(this);
+		trapColor_int = new Random().nextInt(balloongame.LEVEL) + 1;
+		trapColor_str = aimColor_IntToString(trapColor_int);
+		flagSendResult = true;
+
+		paint = new Paint();
+		odt = new OnDrawThread(this);
+		cbt = new CreateBallThread(this, ballgroupview);
+		prt = new PicRunThread(this);
+		prt.start();
+
+	}
+
+	public void setPicAlphaNum(int picAlphaNum) {
+		this.picAlphaNum = picAlphaNum;
+	}
+
+	@Override
+	public void onDraw(Canvas canvas) {
+		// super.onDraw(canvas);
+
+		paint.setColor(Color.WHITE);
+		canvas.drawRect(0, 0, balloongame.SCREENWIDTH, balloongame.SCREENHEIGHT, paint);
+		Bitmap bitmapBG = BitmapFactory.decodeResource(balloongame.getResources(), R.drawable.b_sky);
+		paint.setAlpha(picAlphaNum);
+		RectF rectF = new RectF(0, 0, balloongame.SCREENWIDTH, balloongame.SCREENHEIGHT);
+		canvas.drawBitmap(bitmapBG, null, rectF, paint);
+		paint.setTextSize(48);
+		paint.setColor(Color.YELLOW);
+		//canvas.drawText("Score: " + score, balloongame.SCREENWIDTH/7, balloongame.SCREENHEIGHT/20, paint);
+		if(balloongame.LEVEL >= 2){
+			paint.setTextAlign(Align.CENTER);
+		canvas.drawText("Do not touch " + trapColor_str + " balloons!", balloongame.SCREENWIDTH/2, balloongame.SCREENHEIGHT/20, paint);
+		}
+
+		ballgroupview.drawSelf(gl, balloongame, canvas, paint);
+
+	}
+
+	public String aimColor_IntToString(int aimcolor) {
+		// TODO Auto-generated method stub
+
+		String aimColor = null;
+		switch (aimcolor) {
+		case 1:
+			aimColor = "RED";
+			break;
+		case 2:
+			aimColor = "GREEN";
+			break;
+		case 3:
+			aimColor = "ORANGE";
+			break;
+		case 4:
+			aimColor = "PINK";
+			break;
+		case 5:
+			aimColor = "BLUE";
+			break;
+		case 6:
+			aimColor = "YELLOW";
+			break;
+		}
+		return aimColor;
+	}
+
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
+	}
+
+	@Override
+	public void surfaceCreated(SurfaceHolder holder) {
+		
+		cbt.isrunning = true;
+		odt.isrunning = true;
+		odt.start();
+		cbt.start();
+	}
+
+	@Override
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		
+		boolean retry = true;
+		
+		while(retry){
+			cbt.isrunning = false;
+			odt.isrunning = false;
+			
+			try {
+				odt.join();
+				cbt.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			retry = false;
+		}
+
+	}
+
+	public void addBallView(BallView ballview) {
+		// TODO Auto-generated method stub
+		// Log.d("x&y","x="+ballview.getPicX());
+		ballList.add(ballview);
+	}
+
+	public void drawNextLevel(Canvas canvas) {
+		// TODO Auto-generated method stub
+		paint.setColor(Color.WHITE);
+		canvas.drawRect(0, 0, balloongame.SCREENWIDTH, balloongame.SCREENHEIGHT, paint);
+		Bitmap bitmapBG = BitmapFactory.decodeResource(balloongame.getResources(), R.drawable.b_sky);
+		paint.setAlpha(picAlphaNum);
+		RectF rectF = new RectF(0, 0, balloongame.SCREENWIDTH, balloongame.SCREENHEIGHT);
+		canvas.drawBitmap(bitmapBG, null, rectF, paint);
+		Bitmap bitmapNext = BitmapFactory.decodeResource(getResources(), R.drawable.b_nextlevel);
+		int width = bitmapNext.getWidth();
+		int heigth = bitmapNext.getHeight();
+		int newwidth = balloongame.SCREENWIDTH/6*4;
+		int newheigth = balloongame.SCREENHEIGHT/10*3;
+		float scaleW = ((float) newwidth) / width;
+		float scaleH = ((float) newheigth) / heigth;
+		Matrix matrix = new Matrix();
+		matrix.postScale(scaleW, scaleH);
+
+		bitmapNext = Bitmap.createBitmap(bitmapNext, 0, 0, width, heigth, matrix, true);
+
+		canvas.drawBitmap(bitmapNext, balloongame.SCREENWIDTH/6, balloongame.SCREENHEIGHT/10*3, paint);
+		paint.setColor(Color.YELLOW);
+		String text = "Touch the screen to go next level!";
+		paint.setTextSize(46);
+		paint.setTextAlign(Align.CENTER);
+		canvas.drawText(text, balloongame.SCREENWIDTH/2, balloongame.SCREENHEIGHT/10*6, paint);
+
+	}
+
+	public boolean onTouchEvent(MotionEvent event) {
+		int CurX = (int) event.getX();
+		int CurY = (int) event.getY();
+
+		switch (event.getAction()) {
+		case MotionEvent.ACTION_DOWN:
+			//if (score < com.NPD.unimelb.balloongame.Constant.WINSCORE) {
+			if(nextlevel == false){
+				//end
+				for (int i = 0; i < ballList.size(); i++) {
+					BallView ballview = (BallView) ballList.get(i);
+					int x = (int) ballview.picX;
+					int y = (int) ballview.picY;
+					// Log.d("x&y", "x="+x+" y="+y);
+					if ((CurX >= x) && (CurX <= x + balloongame.SCREENWIDTH/8) && (CurY >= y) && (CurY <= y + balloongame.SCREENWIDTH/9)) {
+						ballview.Pic = R.drawable.b_explode;
+						ballview.burstFlag = 1; // burst
+						//balloongame.playSound(1, 1);
+						ballList.set(i, ballview);
+						if (ballview.color == trapColor_int && balloongame.LEVEL >= 2) {
+							//change rule
+							gameover = true;
+							
+							//score = score - 5;
+						}// else
+							//score = score + 2;
+						//end
+						return true;
+					}
+				}
+			} else {
+				Log.d("level", "balloongame_level="+balloongame.LEVEL);
+				balloongame.LEVEL += 1;
+				if(balloongame.LEVEL == 7) gameover = true;
+				//Log.d("level", "balloongame_level="+balloongame.LEVEL);
+				trapColor_int = new Random().nextInt(balloongame.LEVEL) + 1;
+				trapColor_str = aimColor_IntToString(trapColor_int);
+				//nextlevel = false;
+				return true;
+			}
+		default:
+			return false;
+		}
+	}
+
+	public void drawGameOver(Canvas canvas) {
+		// TODO Auto-generated method stub
+		saveResult(balloongame.LEVEL-1);
+		//this.flagSendResult=true;
+		paint.setColor(Color.WHITE);
+		canvas.drawRect(0, 0, balloongame.SCREENWIDTH, balloongame.SCREENHEIGHT, paint);
+		Bitmap bitmapBG = BitmapFactory.decodeResource(balloongame.getResources(), R.drawable.b_gameover);
+		paint.setAlpha(picAlphaNum);
+		RectF rectF = new RectF(0, 0, balloongame.SCREENWIDTH, balloongame.SCREENHEIGHT);
+		canvas.drawBitmap(bitmapBG, null, rectF, paint);
+	/*	try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		balloongame.backToBalloonView();*/
+		/*new CountDownTimer(2000, 100) {
+			@Override
+			public void onTick(long millisUntilFinished) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void onFinish() { 
+				balloongame.backToBalloonView();
+			}
+		}.start();*/
+	}
+	public void saveResult(int level){
+		if(flagSendResult){
+//			long current =System.currentTimeMillis();
+//			long temp = 1410000000000L;
+//			int currT = (int) (current - temp);
+//			
+			Game game = new Game();
+			game.setGid(3);
+			game.setLevel(level);
+			game.setPid(balloongame.patient.getPid());
+			game.setTime(0);
+			game.setScore(0);
+			game.setPercent(0);
+			game.setAccuracy(0);
+			sendResultThread = new SendResultThread(game);
+			sendResultThread.start();
+			flagSendResult = false;
+			}
+	}
+
+}
